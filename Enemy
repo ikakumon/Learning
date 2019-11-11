@@ -1,0 +1,276 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class Enemy : MonoBehaviour
+{
+    //public GameObject attack;
+    int timer;
+    public int maxhp = 200;
+    bool damaged;
+    public float MagicResis;
+    public float PhysicResis;
+    public float hp;
+    public bool isMagic;
+    public bool attacking;
+    public bool moving = true;
+    public int magicP;
+    public int physicP;
+
+    GameObject obj;
+    public Text t;
+    public float Maxdis;
+    public float DisRemain;
+    public int wp = 1;
+    public List<Transform> WayPoint;
+
+    void Awake()
+    {
+        // Waypoint = GameObject.Find("WayPoints" + wp.ToString()).transform;
+        for (int i = 0; i < EnemyManager.SpawnPoint.childCount; i++)
+        {
+        WayPoint.Add(EnemyManager.SpawnPoint.GetChild(i));
+        }
+
+        StartCoroutine(Born());
+
+    }
+    void Start()
+    {
+        hp = maxhp;
+        for (int i = 0; i < WayPoint.Count - 1; i++)
+        {
+            Maxdis += Vector3.Distance(WayPoint[i].position, WayPoint[i + 1].position);
+        }
+    }
+    IEnumerator Born()
+    {
+            for (float i = 0; i < 1; i += 0.05f)
+            {
+                GetComponentInChildren<Renderer>().material.color = new Color(1, 1, 1, i);
+            yield return new WaitForEndOfFrame();
+
+        }
+    }
+    public float speed = 0.1f;
+
+    public IEnumerator Slow()
+    {
+        speed *= 0.5f;
+        yield return new WaitForSeconds(1);
+        speed *= 2f;
+    }
+
+    public int i;
+    void FixedUpdate()
+    {
+
+        if (moving)
+        {
+            float CD = Vector2.Distance(new Vector2 ( WayPoint[i].position.x,WayPoint[i].position.z), new Vector2(transform.position.x, transform.position.z));
+            float dis = 0;
+            float CurrentDis = 0;
+            for (int a = i; a < WayPoint.Count-1; a++)
+            {
+                dis += Vector2.Distance(new Vector2(WayPoint[a].position.x, WayPoint[a].position.z), new Vector2(WayPoint[a+1].position.x, WayPoint[a+1].position.z));
+            }
+            CurrentDis = CD + dis;
+            DisRemain = CurrentDis;
+            // print(CurrentDis);
+
+            transform.Translate(
+         new Vector3(WayPoint[i].position.x - transform.position.x,0, WayPoint[i].position.z - transform.position.z).normalized * Time.deltaTime * speed);
+
+            if (Vector2.Distance(new Vector2( WayPoint[i].position.x, WayPoint[i].position.z), new Vector2(transform.position.x,transform.position.z)) < 0.05f)
+            {
+                i++;
+            }
+        }
+    }
+    float dmg;
+    RectTransform HP;  //跟随的UI
+    RectTransform BG;  //跟随的UI
+    RectTransform white;  //跟随的UI
+    RectTransform uiParent;  //移动UI的父物体
+    public void Damage(float ap, bool isMagic = false)
+    {
+        StartCoroutine(TurnRed());
+        if (!damaged)
+        {
+            GameObject prefab = (GameObject)Resources.Load("Prefabs/Canvas");
+            obj = Instantiate(prefab);
+            uiParent = obj.GetComponent<RectTransform>();
+            HP = obj.transform.Find("HPbar").GetComponent<RectTransform>();
+            BG = obj.transform.Find("BG").GetComponent<RectTransform>();
+            white = obj.transform.Find("BGwhite").GetComponent<RectTransform>();
+        }
+        damaged = true;
+        if (isMagic)
+        {
+            dmg = ap * (1 - MagicResis);
+            hp -= dmg;
+        }
+        else
+        {
+            dmg = (ap - PhysicResis)<0?0: (ap - PhysicResis) + ap * 0.05f;
+            hp -= dmg;
+        }
+        obj = Instantiate((GameObject)Resources.Load("Prefabs/DamageAmount"));
+        obj.GetComponentInChildren<TextMesh>().text = dmg.ToString();
+        //obj.GetComponentInChildren<TextMesh>().color = Color.red/2;
+        obj.transform.position = transform.position+new Vector3(0,0.5f,-0.2f);
+        if (hp <= 0 && obj)
+        {
+            StartCoroutine(Sink());
+        }
+      //  StartCoroutine(Fade());
+    }
+    IEnumerator Fade()
+    {
+        t.gameObject.SetActive(true);
+        t.text = dmg.ToString();
+        for (int i = 0; i < 30; i++)
+        {
+            t.transform.position = Camera.main.WorldToScreenPoint(transform.position) + new Vector3(40, 40 + i, 0);
+            yield return new WaitForSeconds(0.013f);
+        }
+        t.gameObject.SetActive(false);
+
+    }
+
+    IEnumerator TurnRed()
+    {
+        for (float i = 1; i > 0; i -= 0.2f)
+        {
+            GetComponentInChildren<Renderer>().material.color = new Color(1, i, i);
+            yield return new WaitForEndOfFrame();
+        }
+        for (float i = 0; i < 1; i += 0.2f)
+        {
+            GetComponentInChildren<Renderer>().material.color = new Color(1, i, i);
+            yield return new WaitForEndOfFrame();
+        }
+        GetComponentInChildren<Renderer>().material.color = new Color(1, 1, 1);
+
+    }
+    bool alive = true;
+    IEnumerator Sink()
+    {
+        alive = false;
+        moving = false;
+        Destroy(obj);
+        GetComponentInChildren<Renderer>().material.color = new Color(0, 0, 0);
+
+        for (float i = 0; i < 1; i += 0.025f)
+        {
+            yield return new WaitForEndOfFrame();
+            GetComponent<BoxCollider>().center += new Vector3(0, -0.1f, 0);
+            GetComponentInChildren<Renderer>().material.color = new Color(0, 0, 0, 1 - i);
+        }
+        Destroy(gameObject);
+
+    }
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.tag == "OperatorBody" && other.GetComponentInParent<Operator>().StopNum <= other.GetComponentInParent<Operator>().maxStop)
+        {
+            moving = false;
+            attacking = true;
+        }
+
+    }
+    Transform target;
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Finish")
+        {
+            StartCoroutine(Sink());
+            EnemyQuantityManager.EscapeRemain--;
+        }
+        if (other.tag == "OperatorBody")
+        {
+
+            other.GetComponentInParent<Operator>().StopNum++;
+            if (other.GetComponentInParent<Operator>().StopNum <= other.GetComponentInParent<Operator>().maxStop)
+            {
+                moving = false;
+                attacking = true;
+                target = other.transform;
+                StartCoroutine(Atk());
+            }
+        }
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.tag == "OperatorBody")
+        {
+            attacking = false;
+            moving = alive;
+            target = null;
+            StopCoroutine(Atk());
+            other.GetComponentInParent<Operator>().StopNum--;
+        }
+    }
+    float r;
+
+    void Attack()
+    {
+
+    }
+    IEnumerator Atk()
+    {
+        for (int a = 0; a < 100; a++)
+        {
+            if (attacking)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    transform.GetChild(0).Translate((target.position - transform.position).normalized / 20);
+                    yield return new WaitForEndOfFrame();
+                }
+                target.GetComponentInParent<Operator>().Damage(physicP);
+                for (int i = 0; i < 10; i++)
+                {
+                    transform.GetChild(0).Translate(-(target.position - transform.position).normalized / 20);
+                    yield return new WaitForEndOfFrame();
+                }
+            }
+            yield return new WaitForSeconds(1);
+        }
+
+    }
+    void Update()
+    {
+        timer++;
+        if (damaged && alive)
+        {
+            // World2UI(uiParent, UI,BG,white);
+            BG.position = Camera.main.WorldToScreenPoint(transform.position) + new Vector3(-40, -30, 0);
+            HP.position = BG.position;
+            white.position = BG.position;
+            HP.localScale = new Vector3(hp / maxhp, 1, 1);
+            if (white.localScale.x > hp / maxhp)
+                white.localScale -= new Vector3(0.005f, 0, 0);
+
+        }
+        transform.eulerAngles = new Vector3(0, 20 * Mathf.Sin(Time.time * 8 + r) / 5, 0);
+
+
+    }
+
+
+    /*世界坐标转成UI中父节点的坐标, 并设置子节点的位置
+    public void World2UI( RectTransform uiParent, RectTransform HP, RectTransform BG, RectTransform white)
+    {
+        Vector3 spos = Camera.main.WorldToScreenPoint(transform.position);  //获取屏幕坐标
+        Vector2 vv = new Vector2(spos.x, spos.y);
+        Vector2 retPos;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(uiParent, vv, uiParent.GetComponent<Canvas>().worldCamera, out retPos);  //UI相机
+        HP.anchoredPosition = new Vector2(retPos.x-40, retPos.y-30);
+        BG.anchoredPosition = new Vector2(retPos.x-40, retPos.y-30);
+        white.anchoredPosition = new Vector2(retPos.x-40, retPos.y-30);
+    }
+    */
+}
