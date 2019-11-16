@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Manager : MonoBehaviour
+public class MapDIYManager : MonoBehaviour
 {
     public GameObject block;
     public GameObject block1;
