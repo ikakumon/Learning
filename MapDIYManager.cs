@@ -12,11 +12,11 @@ public class MapDIYManager : MonoBehaviour
     public GameObject block4;
     public GameObject meleeButton;
     public GameObject remoteButton;
+    public Renderer cube;
     LayerMask sp = 1 << 8;
     public Slider r;
     public Slider g;
     public Slider b;
-    public Renderer cube;
     public Text t;
     public InputField input;
     public static int BLOCK=1;
@@ -51,7 +51,6 @@ public class MapDIYManager : MonoBehaviour
     {
         //if (moving)
         //Camera.main.transform.position += new Vector3(0, 0.1f, 0);
-
         //if (rvalue != r.value|| gvalue != g.value || bvalue != b.value)//相当于On value changed
         //{
         //    cube.material.color = new Color(r.value, g.value, b.value, 1);
@@ -59,16 +58,13 @@ public class MapDIYManager : MonoBehaviour
         //    gvalue = g.value;
         //    bvalue = b.value;
         //    input.text = (r.value * 255).ToString();
-
         //}
         //r.value = float.Parse(input.text) / 255;
-
         // float.TryParse(t.text, out result);
         //Camera.main.fieldOfView = 29 + r.value * 10;
 
         if (Input.GetMouseButtonDown(0))
         {
-
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             Physics.Raycast(ray, out RaycastHit m, 100, sp.value);
             if (m.transform && m.transform.childCount==0)
@@ -90,7 +86,6 @@ public class MapDIYManager : MonoBehaviour
                     case 5:
                         Instantiate(block4, m.transform.position, Quaternion.identity, m.transform);
                         break;
-
                 }
             }
             else if (m.transform && m.transform.childCount != 0)
@@ -119,7 +114,6 @@ public class MapDIYManager : MonoBehaviour
         }
         if (Input.GetMouseButton(1))
         {
-
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             Physics.Raycast(ray, out RaycastHit m, 100, sp.value);
             if (m.transform && m.transform.childCount == 0)
@@ -141,7 +135,6 @@ public class MapDIYManager : MonoBehaviour
                     case 5:
                         Instantiate(block4, m.transform.position, Quaternion.identity, m.transform);
                         break;
-
                 }
             }
             else if (m.transform && m.transform.childCount != 0)
@@ -149,8 +142,8 @@ public class MapDIYManager : MonoBehaviour
                 Destroy(m.transform.GetChild(0).gameObject);
                 switch (BLOCK)
                 {
-                    case 0: break;
-
+                    case 0:
+                        break;
                     case 1:
                         Instantiate(block, m.transform.position, Quaternion.identity, m.transform);
                         break;
@@ -166,10 +159,8 @@ public class MapDIYManager : MonoBehaviour
                     case 5:
                         Instantiate(block4, m.transform.position, Quaternion.identity, m.transform);
                         break;
-
                 }
             }
         }
-    
     }
 }
