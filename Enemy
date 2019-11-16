@@ -6,23 +6,23 @@ using UnityEngine.UI;
 public class Enemy : MonoBehaviour
 {
     //public GameObject attack;
+    GameObject obj;
+    bool damaged;
     int timer;
     public int maxhp = 200;
-    bool damaged;
+    public int wp = 1;
+    public int magicP;
+    public int physicP;
     public float MagicResis;
     public float PhysicResis;
+    public float DisRemain;
+    public float Maxdis;
+    public float DisRemain;
     public float hp;
     public bool isMagic;
     public bool attacking;
     public bool moving = true;
-    public int magicP;
-    public int physicP;
-
-    GameObject obj;
     public Text t;
-    public float Maxdis;
-    public float DisRemain;
-    public int wp = 1;
     public List<Transform> WayPoint;
 
     void Awake()
@@ -215,10 +215,7 @@ public class Enemy : MonoBehaviour
     }
     float r;
 
-    void Attack()
-    {
-
-    }
+    
     IEnumerator Atk()
     {
         for (int a = 0; a < 100; a++)
@@ -256,8 +253,6 @@ public class Enemy : MonoBehaviour
 
         }
         transform.eulerAngles = new Vector3(0, 20 * Mathf.Sin(Time.time * 8 + r) / 5, 0);
-
-
     }
 
 
