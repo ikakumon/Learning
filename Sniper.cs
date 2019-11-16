@@ -14,7 +14,6 @@ public class Sniper : Enemy
         maxhp = 200;
         PhysicResis = 20;
         magicP = 0;
-
     }
     void Update()
     {
