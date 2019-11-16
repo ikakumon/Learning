@@ -20,12 +20,7 @@ public class MapDIYManager : MonoBehaviour
     public Text t;
     public InputField input;
     public static int BLOCK=1;
-    void Start()
-    {
-       
-       
-
-    }
+ 
     public void SetMelee()
     {
         sp = 1 << 8;
