@@ -10,7 +10,7 @@ using UnityEngine.UI;
 using LitJson;
 using System.Xml;
 
-public class GameManager : MonoBehaviour
+public class MapSaver : MonoBehaviour
 {
     public static GameManager _instance;
     public bool isPause = true;
@@ -31,7 +31,6 @@ public class GameManager : MonoBehaviour
                 texture.LoadImage(File.ReadAllBytes(Application.dataPath + "/StreamingFile" + "/ScreenShot" + i + ".png"));
                 Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
              //   Instantiate(b, new Vector3(300 * i, 200, 0), Quaternion.identity, GameObject.Find("Canvas").transform).image.sprite = sprite;
-                
             }
         }
     }
@@ -65,7 +64,6 @@ public class GameManager : MonoBehaviour
             save.PositionY.Add(GOs[i].transform.position.y);
             save.PositionX.Add((int)GOs[i].transform.position.x);
             save.Types.Add(GOs[i].GetComponent<Adobe>().type);
-            
         }
         Save.SaveNum += 1;
         return save;
@@ -143,7 +141,6 @@ public class GameManager : MonoBehaviour
         //SaveByBin();
         // SaveByXml();
         SaveByJson();
-
     }
     public void LoadGame()
     {
