@@ -33,7 +33,6 @@ public class MapAutoGenerator : MonoBehaviour
                     Instantiate(block, new Vector3(i, 0.5f, j), Quaternion.identity);
             }
         }
-
     }
 
    
